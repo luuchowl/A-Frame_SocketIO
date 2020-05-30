@@ -16,20 +16,26 @@
 				console.log("I'm connectd");
 				//COLLECT A-FAME CAMERA POSITION AND ROTATION
 				var avatarData = {};
-				avatarData["position"] = "0 0 0";
-				avatarData["rotation"] = "0 0 0";
+				avatarData["position"] = "0 0 0";//SUBSTITUIR PELO POSITION DA CÂMERA
+				avatarData["rotation"] = "0 0 0";//SUBSTITUIR PELO ROTATION DA CÂMERA
 				socket.emit(
 					"avatarCreated",
-					avatarData /*SEND A-FRAME CAMERA POSITION AND ROTATION*/
+					avatarData
 				);
+
+                //TESTING SPACE
 			});
 
 			socket.on("newAvatarCreated", function (msg) {
 				console.log("A wild avatar has appeared");
-				//CREATE AVATAR CUBE USING NEW AVATAR SETTINGS (POSITION AND ROTATION) - msg.position and msg.rotation ***
-				var scene = document.getElementById("scene");
+                var scene = document.getElementById("scene");
 				var avatar = document.createElement("a-box");
-				avatar.setAttribute("color", "black");
+				avatar.setAttribute("position", msg.position);
+                avatar.setAttribute("rotation", msg.rotation);
+                avatar.setAttribute("scale", "0.5 1 0.5");
+                avatar.setAttribute("color", "red");
+                avatar.setAttribute("id", msg.clientId);
+                console.log(msg.clientId);
 				scene.appendChild(avatar);
 			});
 
