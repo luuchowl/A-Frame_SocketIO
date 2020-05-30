@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>A-Frame - SocketIO</title>
+    <meta name="description" content="A-Frame Matta">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script>
+        console.log("connecting")
+        var socket = io.connect('http://127.0.0.1:3000');
+
+        socket.on("connected", function (msg) {
+            console.log("I'm connectd")
+            //COLLECT A-FAME CAMERA POSITION AND ROTATION
+            var avatarData = {}
+            avatarData["position"] = "0 0 0"
+            avatarData["rotation"] = "0 0 0"
+            socket.emit("avatarCreated", avatarData /*SEND A-FRAME CAMERA POSITION AND ROTATION*/);
+        });
+
+        socket.on("newAvatarCreated", function (msg) {
+            console.log("A wild avatar has appeared")
+            //CREATE AVATAR CUBE USING NEW AVATAR SETTINGS (POSITION AND ROTATION) - msg.position and msg.rotation ***
+        });
+
+        socket.on("otherAvatarTransformUpdate", function (msg) {
+            //UPDATE THE OTHER CLIENT'S TRANSFORM AND ROTATION, BASED ON WHAT YOU RECIEVED BY THE SERVER
+        });
+
+        socket.on("destroyThisAvatar", function (msg) {
+            //Destroy server's provided avatar using msg.client_id to find the referenced <a-box> by it's id
+        });
+    </script>
+
+</head>
+
+<body>
+    <!-- ALWAS CHECK IF POSITION AND ROTATION HAS CHANGED -->
+    <!-- IF POSITION AND ROTATION HAS CHANGED, SEND AN EMIT WITH NEW POSITION AND ROTATION -->
+    <div class="name" id="name">Alex</div>
+    <a-scene>
+        <a-box id="test" color="black">
+    
+        </a-box>
+    </a-scene>
+
+</body>
+
+</html>
