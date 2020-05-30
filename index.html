@@ -8,6 +8,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
 		<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+		<script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
 		<script>
 			console.log("connecting");
 			var socket = io.connect("http://127.0.0.1:3000");
@@ -16,29 +17,40 @@
 				console.log("I'm connectd");
 				//COLLECT A-FAME CAMERA POSITION AND ROTATION
 				var avatarData = {};
-				avatarData["position"] = "0 0 0";//SUBSTITUIR PELO POSITION DA CÂMERA
-				avatarData["rotation"] = "0 0 0";//SUBSTITUIR PELO ROTATION DA CÂMERA
-				socket.emit(
-					"avatarCreated",
-					avatarData
-				);
+				// avatarData["position"] = "0 0 0"; //SUBSTITUIR PELO POSITION DA CÂMERA
+				avatarData["position"] = document
+					.getElementById("cam")
+					.getAttribute("position");
+				console.log(avatarData["position"]);
+				// avatarData["rotation"] = "0 0 0"; //SUBSTITUIR PELO ROTATION DA CÂMERA
+				avatarData["rotation"] = document
+					.getElementById("cam")
+					.getAttribute("rotation");
+				console.log(avatarData["rotation"]);
+				socket.emit("avatarCreated", avatarData);
 
-                //TESTING SPACE
+				//TESTING SPACE
 			});
 
 			socket.on("newAvatarCreated", function (msg) {
 				console.log("A wild avatar has appeared");
-                var scene = document.getElementById("scene");
+				var scene = document.getElementById("scene");
+				var avatarParent = document.createElement("a-entity");
+				avatarParent.setAttribute("id", msg.clientId);
+				avatarParent.setAttribute("position", position);
+				avatarParent.setAttribute("rotation", rotation);
+				var camera = document.createElement("a-camera");
+				camera.setAttribute("active", "true");
 				var avatar = document.createElement("a-box");
-				avatar.setAttribute("position", msg.position);
-                avatar.setAttribute("rotation", msg.rotation);
-                avatar.setAttribute("scale", "0.5 1 0.5");
-                avatar.setAttribute("color", "red");
-                avatar.setAttribute("id", msg.clientId);
-                console.log(msg.clientId);
-				scene.appendChild(avatar);
+				avatar.setAttribute("position", "0 0 0");
+				avatar.setAttribute("rotation", "0 0 0");
+				avatar.setAttribute("scale", "0.5 1 0.5");
+				avatar.setAttribute("color", "red");
+				console.log(msg.clientId);
+				avatarParent.appendChild(camera);
+				avatarParent.appendChild(avatar);
+				scene.appendChild(avatarParent);
 			});
-
 			socket.on("otherAvatarTransformUpdate", function (msg) {
 				//UPDATE THE OTHER CLIENT'S TRANSFORM AND ROTATION, BASED ON WHAT YOU RECIEVED BY THE SERVER
 			});
@@ -51,6 +63,9 @@
 	<body>
 		<!-- ALWAS CHECK IF POSITION AND ROTATION HAS CHANGED -->
 		<!-- IF POSITION AND ROTATION HAS CHANGED, SEND AN EMIT WITH NEW POSITION AND ROTATION -->
-		<a-scene id="scene"> </a-scene>
+		<a-scene id="scene">
+			<a-camera id="cam"></a-camera>
+			<a-entity environment="preset: forest; dressingAmount: 500; "></a-entity>
+		</a-scene>
 	</body>
 </html>
