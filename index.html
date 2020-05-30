@@ -35,21 +35,14 @@
 			socket.on("newAvatarCreated", function (msg) {
 				console.log("A wild avatar has appeared");
 				var scene = document.getElementById("scene");
-				var avatarParent = document.createElement("a-entity");
-				avatarParent.setAttribute("id", msg.clientId);
-				avatarParent.setAttribute("position", position);
-				avatarParent.setAttribute("rotation", rotation);
-				var camera = document.createElement("a-camera");
-				camera.setAttribute("active", "true");
 				var avatar = document.createElement("a-box");
-				avatar.setAttribute("position", "0 0 0");
-				avatar.setAttribute("rotation", "0 0 0");
+				avatar.setAttribute("id", clientId);
+				avatar.setAttribute("position", position);
+				avatar.setAttribute("rotation", rotation);
 				avatar.setAttribute("scale", "0.5 1 0.5");
 				avatar.setAttribute("color", "red");
 				console.log(msg.clientId);
-				avatarParent.appendChild(camera);
-				avatarParent.appendChild(avatar);
-				scene.appendChild(avatarParent);
+				scene.appendChild(avatar);
 			});
 			socket.on("otherAvatarTransformUpdate", function (msg) {
 				//UPDATE THE OTHER CLIENT'S TRANSFORM AND ROTATION, BASED ON WHAT YOU RECIEVED BY THE SERVER
