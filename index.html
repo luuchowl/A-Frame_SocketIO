@@ -19,7 +19,7 @@
             console.log("I'm connectd");
 
             //COLLECT A-FAME CAMERA POSITION AND ROTATION
-            var avatarData = {};
+            avatarData = {};
             avatarData["position"] = document
                 .getElementById("cam")
                 .getAttribute("position");
@@ -32,25 +32,43 @@
         });
 
         socket.on("newAvatarCreated", function (msg) {
-            var scene = document.getElementById("scene");
-            var avatar = document.createElement("a-box");
-            avatar.setAttribute("id", msg.clientId);
-            avatar.setAttribute("position", msg.position);
-            avatar.setAttribute("rotation", msg.rotation);
-            avatar.setAttribute("scale", "0.5 1 0.5");
-            avatar.setAttribute("color", "red");
-            scene.appendChild(avatar);
+            scene = document.getElementById("scene");
+            avatarObj = document.createElement("a-box");
+            avatarObj.setAttribute("id", msg.clientId);
+            avatarObj.setAttribute("position", msg.position);
+            avatarObj.setAttribute("rotation", msg.rotation);
+            avatarObj.setAttribute("scale", "0.5 1 0.5");
+            avatarObj.setAttribute("color", "red");
+            scene.appendChild(avatarObj);
+        });
+        socket.on("setOlderAvatars", function (msg) {
+            avatars = msg["avatars"]
+            
+            scene = document.getElementById("scene");
+            for (i = 0; i < msg["avatars"].length; i++) {
+                if (avatars[i]["clientId"] != msg["clientId"]) {
+                    avatar = avatars[i]
+                    console.log(avatar)
+                    avatarObj = document.createElement("a-box");
+                    avatarObj.setAttribute("id", avatar["clientId"]);
+                    avatarObj.setAttribute("position", avatar["position"]);
+                    avatarObj.setAttribute("rotation", avatar["rotation"]);
+                    avatarObj.setAttribute("scale", "0.5 1 0.5");
+                    avatarObj.setAttribute("color", "red");
+                    scene.appendChild(avatarObj);
+                }
+            }
         });
         socket.on("otherAvatarTransformUpdate", function (msg) {
-            var otherAvatar = document.getElementById(msg.clientId);
+            otherAvatar = document.getElementById(msg.clientId);
             otherAvatar.setAttribute("position", msg.position);
             otherAvatar.setAttribute("rotation", msg.rotation);
             //UPDATE THE OTHER CLIENT'S TRANSFORM AND ROTATION, BASED ON WHAT YOU RECIEVED BY THE SERVER
         });
 
         socket.on("destroyThisAvatar", function (msg) {
-            var scene = document.getElementById("scene");
-            var objectToDestroy = document.getElementById(msg.clientId);
+            scene = document.getElementById("scene");
+            objectToDestroy = document.getElementById(msg.clientId);
             scene.removeChild(objectToDestroy);
             //Destroy server's provided avatar using msg.client_id to find the referenced <a-box> by it's id
         });
@@ -93,7 +111,7 @@
                     }
                     //console.log("avatarData position = %o  --- this postion = %o", avatarData["position"], this.myPosition)
                 }
-            },time)
+            }, time)
         });
     </script>
     <a-scene id="scene">
