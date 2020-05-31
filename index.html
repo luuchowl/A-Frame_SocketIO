@@ -11,6 +11,7 @@
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
     <script>
+
         var online = false
         console.log("connecting");
         var socket = io.connect("http://127.0.0.1:3000");
@@ -19,11 +20,9 @@
 
             //COLLECT A-FAME CAMERA POSITION AND ROTATION
             var avatarData = {};
-            // avatarData["position"] = "0 0 0"; //SUBSTITUIR PELO POSITION DA CÂMERA
             avatarData["position"] = document
                 .getElementById("cam")
                 .getAttribute("position");
-            // avatarData["rotation"] = "0 0 0"; //SUBSTITUIR PELO ROTATION DA CÂMERA
             avatarData["rotation"] = document
                 .getElementById("cam")
                 .getAttribute("rotation");
@@ -74,19 +73,14 @@
                     avatarData["rotation"] = document
                         .getElementById("cam")
                         .getAttribute("rotation");
-                    myPosition = this.myPosition
-                    myRotation = this.myRotation
-                    if (avatarData["position"] != myPosition || avatarData["rotation"] != myRotation) {
-                        //console.log("global position = %o  --- new postion = %o", myPos, avatarData["position"])
-                        myPosition = avatarData["position"]
-                        myRotation = avatarData["rotation"]
-                        console.log("updated")
-                    } else {
+                    if (avatarData["position"] === this.myPosition || avatarData["rotation"] === this.myRotation) {
                         console.log("not updated")
-                        //console.log("NOT UPDATED:   global position = %o  --- new postion = %o", this.myPosition, avatarData["position"])
+                    } else {
+                        this.myPosition = avatarData["position"]
+                        this.myRotation = avatarData["rotation"]
+                        console.log("updated position")
                     }
-                    this.myPosition = myPosition
-                    this.myRotation = myRotation
+                    //console.log("avatarData position = %o  --- this postion = %o", avatarData["position"], this.myPosition)
                 }
             })
         });
