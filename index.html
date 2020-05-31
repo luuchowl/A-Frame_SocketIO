@@ -14,7 +14,7 @@
     <script>
         var online = false;
         console.log("connecting");
-        var socket = io.connect("http://127.0.0.1:3000");
+        var socket = io.connect("https://aframe-projects.rj.r.appspot.com");
         socket.on("connected", function (msg) {
             console.log("I'm connectd");
 
