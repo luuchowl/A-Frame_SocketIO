@@ -10,9 +10,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
     <script>
-
-        var online = false
+        var online = false;
         console.log("connecting");
         var socket = io.connect("http://127.0.0.1:3000");
         socket.on("connected", function (msg) {
@@ -27,7 +27,7 @@
                 .getElementById("cam")
                 .getAttribute("rotation");
             socket.emit("avatarCreated", avatarData);
-            online = true
+            online = true;
             //TESTING SPACE
         });
 
@@ -42,7 +42,7 @@
             scene.appendChild(avatar);
         });
         socket.on("otherAvatarTransformUpdate", function (msg) {
-            console.log(msg.position)
+            console.log(msg.position);
 
             //UPDATE THE OTHER CLIENT'S TRANSFORM AND ROTATION, BASED ON WHAT YOU RECIEVED BY THE SERVER
         });
@@ -60,12 +60,15 @@
     <!-- ALWAS CHECK IF POSITION AND ROTATION HAS CHANGED -->
     <!-- IF POSITION AND ROTATION HAS CHANGED, SEND AN EMIT WITH NEW POSITION AND ROTATION -->
     <script>
-        var myPosition
-        var myRotation
-        AFRAME.registerComponent('rotation-reader', {
-            tick: (function () {
+        var myPosition;
+        var myRotation;
+        var time = 1
+        var timeDelta = 30
+        AFRAME.registerComponent("transform-reader", {
+
+            tick: function (time, timeDelta) {
                 if (window.online) {
-                    avatarData = {}
+                    avatarData = {};
                     avatarData["position"] = document
                         .getElementById("cam")
                         .getAttribute("position");
@@ -73,23 +76,28 @@
                     avatarData["rotation"] = document
                         .getElementById("cam")
                         .getAttribute("rotation");
-                    if (avatarData["position"] === this.myPosition || avatarData["rotation"] === this.myRotation) {
-                        console.log("not updated")
+
+                    var tempAvatar = _.cloneDeep(avatarData);
+
+                    if (
+                        JSON.stringify(tempAvatar["position"]) ===
+                        JSON.stringify(myPosition) &&
+                        JSON.stringify(tempAvatar["rotation"]) ===
+                        JSON.stringify(myRotation)
+                    ) {
+                        console.log("not updated");
                     } else {
-                        this.myPosition = avatarData["position"]
-                        this.myRotation = avatarData["rotation"]
-                        console.log("updated position")
+                        myPosition = _.cloneDeep(tempAvatar["position"]);
+                        myRotation = _.cloneDeep(tempAvatar["rotation"]);
+                        console.log("updated position");
                     }
                     //console.log("avatarData position = %o  --- this postion = %o", avatarData["position"], this.myPosition)
                 }
-            })
+            },
         });
     </script>
     <a-scene id="scene">
-
-        <a-camera id="cam" rotation-reader>
-
-        </a-camera>
+        <a-camera id="cam" transform-reader> </a-camera>
         <!-- -->
         <a-entity environment="preset: forest; dressingAmount: 500; "></a-entity>
     </a-scene>
