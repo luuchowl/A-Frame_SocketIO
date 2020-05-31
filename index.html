@@ -1,64 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>A-Frame - SocketIO</title>
-		<meta name="description" content="A-Frame Matta" />
-		<meta charset="utf-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
-		<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
-		<script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
-		<script>
-			console.log("connecting");
-			var socket = io.connect("http://127.0.0.1:3000");
 
-			socket.on("connected", function (msg) {
-				console.log("I'm connectd");
-				//COLLECT A-FAME CAMERA POSITION AND ROTATION
-				var avatarData = {};
-				// avatarData["position"] = "0 0 0"; //SUBSTITUIR PELO POSITION DA CÂMERA
-				avatarData["position"] = document
-					.getElementById("cam")
-					.getAttribute("position");
-				console.log(avatarData["position"]);
-				// avatarData["rotation"] = "0 0 0"; //SUBSTITUIR PELO ROTATION DA CÂMERA
-				avatarData["rotation"] = document
-					.getElementById("cam")
-					.getAttribute("rotation");
-				console.log(avatarData["rotation"]);
-				socket.emit("avatarCreated", avatarData);
+<head>
+    <title>A-Frame - SocketIO</title>
+    <meta name="description" content="A-Frame Matta" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+    <script>
+        var online = false
+        console.log("connecting");
+        var socket = io.connect("http://127.0.0.1:3000");
+        socket.on("connected", function (msg) {
+            console.log("I'm connectd");
 
-				//TESTING SPACE
-			});
+            //COLLECT A-FAME CAMERA POSITION AND ROTATION
+            var avatarData = {};
+            // avatarData["position"] = "0 0 0"; //SUBSTITUIR PELO POSITION DA CÂMERA
+            avatarData["position"] = document
+                .getElementById("cam")
+                .getAttribute("position");
+            // avatarData["rotation"] = "0 0 0"; //SUBSTITUIR PELO ROTATION DA CÂMERA
+            avatarData["rotation"] = document
+                .getElementById("cam")
+                .getAttribute("rotation");
+            socket.emit("avatarCreated", avatarData);
+            online = true
+            //TESTING SPACE
+        });
 
-			socket.on("newAvatarCreated", function (msg) {
-				console.log("A wild avatar has appeared");
-				var scene = document.getElementById("scene");
-				var avatar = document.createElement("a-box");
-				avatar.setAttribute("id", clientId);
-				avatar.setAttribute("position", position);
-				avatar.setAttribute("rotation", rotation);
-				avatar.setAttribute("scale", "0.5 1 0.5");
-				avatar.setAttribute("color", "red");
-				console.log(msg.clientId);
-				scene.appendChild(avatar);
-			});
-			socket.on("otherAvatarTransformUpdate", function (msg) {
-				//UPDATE THE OTHER CLIENT'S TRANSFORM AND ROTATION, BASED ON WHAT YOU RECIEVED BY THE SERVER
-			});
+        socket.on("newAvatarCreated", function (msg) {
+            var scene = document.getElementById("scene");
+            var avatar = document.createElement("a-box");
+            avatar.setAttribute("id", msg.clientId);
+            avatar.setAttribute("position", msg.position);
+            avatar.setAttribute("rotation", msg.rotation);
+            avatar.setAttribute("scale", "0.5 1 0.5");
+            avatar.setAttribute("color", "red");
+            scene.appendChild(avatar);
+        });
+        socket.on("otherAvatarTransformUpdate", function (msg) {
+            console.log(msg.position)
 
-			socket.on("destroyThisAvatar", function (msg) {
-				//Destroy server's provided avatar using msg.client_id to find the referenced <a-box> by it's id
-			});
-		</script>
-	</head>
-	<body>
-		<!-- ALWAS CHECK IF POSITION AND ROTATION HAS CHANGED -->
-		<!-- IF POSITION AND ROTATION HAS CHANGED, SEND AN EMIT WITH NEW POSITION AND ROTATION -->
-		<a-scene id="scene">
-			<a-camera id="cam"></a-camera>
-			<a-entity environment="preset: forest; dressingAmount: 500; "></a-entity>
-		</a-scene>
-	</body>
+            //UPDATE THE OTHER CLIENT'S TRANSFORM AND ROTATION, BASED ON WHAT YOU RECIEVED BY THE SERVER
+        });
+
+        socket.on("destroyThisAvatar", function (msg) {
+            var scene = document.getElementById("scene");
+            var objectToDestroy = document.getElementById(msg.clientId);
+            scene.removeChild(objectToDestroy);
+            //Destroy server's provided avatar using msg.client_id to find the referenced <a-box> by it's id
+        });
+    </script>
+</head>
+
+<body>
+    <!-- ALWAS CHECK IF POSITION AND ROTATION HAS CHANGED -->
+    <!-- IF POSITION AND ROTATION HAS CHANGED, SEND AN EMIT WITH NEW POSITION AND ROTATION -->
+    <script>
+        var myPosition
+        var myRotation
+        AFRAME.registerComponent('rotation-reader', {
+            tick: (function () {
+                if (window.online) {
+                    avatarData = {}
+                    avatarData["position"] = document
+                        .getElementById("cam")
+                        .getAttribute("position");
+
+                    avatarData["rotation"] = document
+                        .getElementById("cam")
+                        .getAttribute("rotation");
+                    myPosition = this.myPosition
+                    myRotation = this.myRotation
+                    if (avatarData["position"] != myPosition || avatarData["rotation"] != myRotation) {
+                        //console.log("global position = %o  --- new postion = %o", myPos, avatarData["position"])
+                        myPosition = avatarData["position"]
+                        myRotation = avatarData["rotation"]
+                        console.log("updated")
+                    } else {
+                        console.log("not updated")
+                        //console.log("NOT UPDATED:   global position = %o  --- new postion = %o", this.myPosition, avatarData["position"])
+                    }
+                    this.myPosition = myPosition
+                    this.myRotation = myRotation
+                }
+            })
+        });
+    </script>
+    <a-scene id="scene">
+
+        <a-camera id="cam" rotation-reader>
+
+        </a-camera>
+        <!-- -->
+        <a-entity environment="preset: forest; dressingAmount: 500; "></a-entity>
+    </a-scene>
+</body>
+
 </html>
