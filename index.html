@@ -42,8 +42,9 @@
             scene.appendChild(avatar);
         });
         socket.on("otherAvatarTransformUpdate", function (msg) {
-            console.log(msg.position);
-
+            var otherAvatar = document.getElementById(msg.clientId);
+            otherAvatar.setAttribute("position", msg.position);
+            otherAvatar.setAttribute("rotation", msg.rotation);
             //UPDATE THE OTHER CLIENT'S TRANSFORM AND ROTATION, BASED ON WHAT YOU RECIEVED BY THE SERVER
         });
 
@@ -62,11 +63,10 @@
     <script>
         let myPosition;
         let myRotation;
-        let time = 1
-        let timeDelta = 30
+        let time = 16.666;
         AFRAME.registerComponent("transform-reader", {
 
-            tick: function (time, timeDelta) {
+            tick: AFRAME.utils.throttleTick(function (t, dt) {
                 if (window.online) {
                     avatarData = {};
                     avatarData["position"] = document
@@ -85,15 +85,15 @@
                         JSON.stringify(tempAvatar["rotation"]) ===
                         JSON.stringify(myRotation)
                     ) {
-                        console.log("not updated");
+                        //console.log("not updated");
                     } else {
                         myPosition = _.cloneDeep(tempAvatar["position"]);
                         myRotation = _.cloneDeep(tempAvatar["rotation"]);
-                        console.log("updated position");
+                        socket.emit("avatarTransformUpdate", _.cloneDeep(tempAvatar));
                     }
                     //console.log("avatarData position = %o  --- this postion = %o", avatarData["position"], this.myPosition)
                 }
-            },
+            },time)
         });
     </script>
     <a-scene id="scene">
