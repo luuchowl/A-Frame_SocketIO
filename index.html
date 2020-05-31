@@ -60,10 +60,10 @@
     <!-- ALWAS CHECK IF POSITION AND ROTATION HAS CHANGED -->
     <!-- IF POSITION AND ROTATION HAS CHANGED, SEND AN EMIT WITH NEW POSITION AND ROTATION -->
     <script>
-        var myPosition;
-        var myRotation;
-        var time = 1
-        var timeDelta = 30
+        let myPosition;
+        let myRotation;
+        let time = 1
+        let timeDelta = 30
         AFRAME.registerComponent("transform-reader", {
 
             tick: function (time, timeDelta) {
@@ -77,7 +77,7 @@
                         .getElementById("cam")
                         .getAttribute("rotation");
 
-                    var tempAvatar = _.cloneDeep(avatarData);
+                    tempAvatar = _.cloneDeep(avatarData);
 
                     if (
                         JSON.stringify(tempAvatar["position"]) ===
